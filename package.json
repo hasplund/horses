@@ -1,0 +1,19 @@
+{
+  "name": "horses",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "nodemon": "DEBUG=horses:* nodemon ./bin/www --ignore public/"
+  },
+  "dependencies": {
+    "agenda": "^3.1.0",
+    "agendash": "^1.0.0",
+    "axios": "^0.19.2",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "morgan": "~1.9.1",
+    "nodemon": "^2.0.3"
+  }
+}
