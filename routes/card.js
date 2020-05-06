@@ -4,9 +4,6 @@ const mongoose = require('mongoose')
 const Card = require('../model/card')
 
 router.get('/', function (req, res, next) {
-    console.log("-------");
-    console.log(Card);
-    console.log("-------");
     Card
         .find()
         .exec(function (err, cards) {

@@ -61,4 +61,5 @@ require('./user.js');*/
 
 //require('./view.js');
 
-require('./card.js');
+require('./card');
+require('./race')

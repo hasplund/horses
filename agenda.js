@@ -18,13 +18,12 @@ agenda.define('load cards', async job => {
     console.log('load cards')
     await axios({
         method: "get",
-        url: 'https://www.veikkaus.fi//api/toto-info/v1/cards/active',
+        url: 'https://www.veikkaus.fi//api/toto-info/v1/cards/today',
         responseType: 'json'
     })
         .then(function (response) {
             for (let item in response['data']['collection']) {
-                let dataItem = response['data']['collection'][item]
-                console.log(dataItem);
+                let dataItem = response['data']['collection'][item];
                 axios({
                     method: 'post',
                     url: 'http://localhost:3000/cards',
@@ -35,17 +34,30 @@ agenda.define('load cards', async job => {
                         meetDate: dataItem['meetDate'],
                         trackAbbreviation: dataItem['trackAbbreviation'],
                         trackName: dataItem['trackName'],
-                        raceType: dataItem['raceType']
+                        raceType: dataItem['raceType'],
+                        done: false
                     }
-                })
+                });
             }
-        })
+        });
+});
+
+agenda.define('load races', async job => {
+    console.log('load races');
+    Card
+        .find({done: false})
+        .exec(function (err, cards) {
+            for (let item in cards) {
+                console.log("CARDS "+cards[item]['cardId'])
+            }
+        });
 });
 
 (async function () { // IIFE to give access to async/await
     await agenda.start();
-    await agenda.now('load cards');
-    await agenda.every('10 minutes', 'load cards');
+    await agenda.purge();
+    await agenda.every('10 minutes', 'load cards')
+    await agenda.every('10 minutes', 'load races')
 })();
 
 function graceful() {
