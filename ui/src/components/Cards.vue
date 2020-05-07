@@ -1,27 +1,30 @@
 <template>
-  <div>
-    <b-container>
-      <b-jumbotron header="BootstrapVue" lead="Bootstrap v4 Components for Vue.js 2">
-        <p>For more information visit our website</p>
-        <b-btn variant="primary" href="https://bootstrap-vue.org/">More Info</b-btn>
-      </b-jumbotron>
+  <b-container>
+    <h1>Bitcoin Price Index</h1>
+    <h2>Essay on the deeper meaning of Vue</h2>
 
-      <b-form-group
-        horizontal
-        :label-cols="4"
-        description="Let us know your name."
-        label="Enter your name"
+    <section v-if="errored">
+      <p>We're sorry, we're not able to retrieve this information at the moment, please try back later</p>
+    </section>
+
+    <section v-else>
+      <div v-if="loading">Loading...</div>
+
+      <div
+        v-else
+        v-for="currency in info"
+        class="currency"
       >
-        <b-form-input v-model.trim="name"></b-form-input>
-      </b-form-group>
+        {{ currency.description }}:
+        <span class="lighten">
+        <span v-html="currency.symbol"></span>{{ currency.rate_float | currencydecimal }}
+      </span>
+      </div>
 
-      <b-alert variant="success" :show="showAlert">Hello {{ name }}</b-alert>
-    </b-container>
-    {{ info }}
-  </div>
+    </section>
+  </b-container>
 </template>
 <script>
-
 
 </script>
 <style>

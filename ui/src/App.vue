@@ -1,41 +1,51 @@
 <template>
-  <div id="app">
-    <!--<div>
-      <b-dropdown id="dropdown-1" text="Dropdown Button" class="m-md-2">
-        <b-dropdown-item>First Action</b-dropdown-item>
-        <b-dropdown-item>Second Action</b-dropdown-item>
-        <b-dropdown-item>Third Action</b-dropdown-item>
-        <b-dropdown-divider></b-dropdown-divider>
-        <b-dropdown-item active>Active action</b-dropdown-item>
-        <b-dropdown-item disabled>Disabled action</b-dropdown-item>
-      </b-dropdown>
-    </div>-->
-    <Cards/>
-    <HelloWorld/>
+  <div class="app">
+    <ul v-if="posts && posts.length">
+      <li v-for="post of posts">
+        <p><strong>{{post.country}}</strong></p>
+        <p>{{post.body}}</p>
+      </li>
+    </ul>
+
+    <ul v-if="errors && errors.length">
+      <li v-for="error of errors">
+        {{error.message}}
+      </li>
+    </ul>
   </div>
 </template>
 
 <script>
-// import HelloWorld from './components/HelloWorld'
-import Cards from './components/Cards'
+  import axios from 'axios';
 
-export default {
-  name: 'App',
-  components: {
-   // HelloWorld,
-    Cards,
+  export default {
+    data() {
+      return {
+        posts: [],
+        errors: []
+      }
+    },
+
+    // Fetches posts when the component is created.
+    created() {
+      //axios.get(`http://jsonplaceholder.typicode.com/posts`)
+      axios.get(`http://localhost:3000/cards`)
+        .then(response => {
+          // JSON responses are automatically parsed.
+          this.posts = response.data
+        })
+        .catch(e => {
+          this.errors.push(e)
+        })
+
+      // async / await version (created() becomes async created())
+      //
+      // try {
+      //   const response = await axios.get(`http://jsonplaceholder.typicode.com/posts`)
+      //   this.posts = response.data
+      // } catch (e) {
+      //   this.errors.push(e)
+      // }
+    }
   }
-}
-
 </script>
-
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
