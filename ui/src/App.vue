@@ -1,12 +1,15 @@
 <template>
   <div class="app">
-    <ul v-if="posts && posts.length">
-      <li v-for="post of posts">
-        <p><strong>{{post.country}}</strong></p>
-        <p>{{post.body}}</p>
-      </li>
-    </ul>
-
+    <b-container>
+      <table v-if="posts && posts.length">
+        <th>Track name</th>
+        <th>Country</th>
+        <tr v-for="post of posts">
+          <td>{{ post.trackName }}</td>
+          <td>{{ post.country }}</td>
+        </tr>
+      </table>
+    </b-container>
     <ul v-if="errors && errors.length">
       <li v-for="error of errors">
         {{error.message}}

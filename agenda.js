@@ -34,8 +34,7 @@ agenda.define('load cards', async job => {
                         meetDate: dataItem['meetDate'],
                         trackAbbreviation: dataItem['trackAbbreviation'],
                         trackName: dataItem['trackName'],
-                        raceType: dataItem['raceType'],
-                        done: false
+                        raceType: dataItem['raceType']
                     }
                 });
             }
@@ -44,14 +43,75 @@ agenda.define('load cards', async job => {
 
 agenda.define('load races', async job => {
     console.log('load races');
-    Card
-        .find({done: false})
-        .exec(function (err, cards) {
-            for (let item in cards) {
-                console.log("CARDS "+cards[item]['cardId'])
-            }
-        });
+    axios({
+        method: 'get',
+        url: 'http://localhost:3000/cards',
+        responseType: 'json'
+    })
+        .then(function (response) {
+            for (let item in response['data']) {
+                console.log(response['data'][item]['cardId']);
+
+                axios({
+                    method: 'get',
+                    url: 'https://www.veikkaus.fi//api/toto-info/v1/card/' + response['data'][item]['cardId'] + "/races",
+                    responseType: 'json'
+                }).then(function (response) {
+                    for (let i in response['data']['collection']) {
+                        // console.log(response['data']['collection'])
+                        let dItem = response['data']['collection'][i];
+                        console.log(dItem['raceId']);
+                        axios({
+                            method: 'post',
+                            url: 'http://localhost:3000/races',
+                            responseType: 'json',
+                            data: {
+                                raceId: dItem['raceId'],
+                                cardId: dItem['cardId'],
+                                number: dItem['number'],
+                                startTime: dItem['startTime'],
+                                startType: dItem['startType'],
+                                distance: dItem['distance'],
+                                breed: dItem['breed'],
+                                toteResultString: dItem['toteResultString']
+                            }
+                        })
+                    }
+                });
+            }}
+        )
 });
+/*axios({
+    method: 'get',
+    url: 'http://localhost:3000/cards/',
+    responseType: 'json'
+})
+    .then(function (response) {
+        for (let item in response['data']['collection']) {
+            let dataItem = response['data']['collection'][item]
+            axios({
+                method: 'get',
+                url: 'https://www.veikkaus.fi//api/toto-info/v1/card/' + dataItem['cardId'] + '/races',
+                responseType: 'json'
+            })
+                .then(function (response) {
+                    for (let i in response['data']) {
+                        let dItem = response['data'][i];
+                        axios({
+                            method: 'post',
+                            url: 'http://localhost:3000/',
+                            data: {cardId: dItem['cardId'], raceId: dItem['raceId']},
+                            responseType: 'json'
+                        }
+                            .then(function (response) {
+
+                            }))
+                    }
+                })
+        }
+    })
+});*/
+
 
 (async function () { // IIFE to give access to async/await
     await agenda.start();
