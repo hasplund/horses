@@ -38,7 +38,9 @@
         .then(response => {
           let cards = []
           for (let item in response.data) {
-            cards[item]=response.data[item];
+            // cards[item]=response.data[item];
+            cards[item]=response.data[item]
+            console.log(cards[item])
           }
           this.posts = cards;
         })

@@ -12,6 +12,15 @@ router.get('/', function (req, res) {
         });
 })
 
+router.get('/card/:cardId', function (req, res) {
+    Race
+        .find({cardId: req['cardId']})
+        .exec(function (err, races) {
+            if (err) throw err;
+            res.json(races)
+        })
+});
+
 router.post('/', function (req, res) {
     let cardId = req.body.cardId;
     let raceId = req.body.raceId;
