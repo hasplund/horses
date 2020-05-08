@@ -34,7 +34,8 @@ router.post('/', function (req, res) {
                     meetDate: req.body.meetDate,
                     trackAbbreviation: req.body.trackAbbreviation,
                     trackName: req.body.trackName,
-                    raceType: req.body.raceType
+                    raceType: req.body.raceType,
+                    done: req.body.done || false
                 }
             },
             {
