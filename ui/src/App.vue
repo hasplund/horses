@@ -4,9 +4,13 @@
       <table v-if="posts && posts.length">
         <th>Track name</th>
         <th>Country</th>
+        <th>Race Type</th>
+        <th>Card ID</th>
         <tr v-for="post of posts">
           <td>{{ post.trackName }}</td>
           <td>{{ post.country }}</td>
+          <td>{{ post.raceType }}</td>
+          <td>{{ post.cardId}}</td>
         </tr>
       </table>
     </b-container>
@@ -28,27 +32,16 @@
         errors: []
       }
     },
-
-    // Fetches posts when the component is created.
+    // Fetches cards when the component is created.
     created() {
-      //axios.get(`http://jsonplaceholder.typicode.com/posts`)
-      axios.get(`http://localhost:3000/cards`)
+      axios.get('http://localhost:3000/cards')
         .then(response => {
-          // JSON responses are automatically parsed.
-          this.posts = response.data
+          let cards = []
+          for (let item in response.data) {
+            cards[item]=response.data[item];
+          }
+          this.posts = cards;
         })
-        .catch(e => {
-          this.errors.push(e)
-        })
-
-      // async / await version (created() becomes async created())
-      //
-      // try {
-      //   const response = await axios.get(`http://jsonplaceholder.typicode.com/posts`)
-      //   this.posts = response.data
-      // } catch (e) {
-      //   this.errors.push(e)
-      // }
     }
   }
 </script>
