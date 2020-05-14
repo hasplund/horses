@@ -7,14 +7,12 @@ router.get('/', function (req, res, next) {
     Card
         .find()
         .exec(function (err, cards) {
-            console.log(cards);
             if (err) throw err;
             res.json(cards)
         });
 })
 
-router.get('/:cardId/', function (req, res) {
-    console.log(req.param('cardId'))
+router.get('/:cardId', function (req, res) {
     Card
         .findOne({cardId: req.param('cardId')})
         .exec(function (err, card) {
@@ -25,6 +23,7 @@ router.get('/:cardId/', function (req, res) {
 
 router.post('/', function (req, res) {
     let cardId = req.body.cardId;
+    console.log("CARDID: "+cardId)
     Card
         .findOneAndUpdate({cardId: req.body.cardId},
             {

@@ -4,13 +4,12 @@ const Schema = mongoose.Schema;
 const CardSchema = new Schema({
     cardId: Number,
     country: String,
-    date: Date,
     firstRaceStart: Date,
     meetDate: Date,
     trackAbbreviation: String,
     trackName: String,
     raceType: String,
-    done: { type: Boolean, default: false }
+    active: { type: Boolean, default: true }
 })
 
 module.exports = mongoose.model('Card', CardSchema)
