@@ -27,27 +27,28 @@ function prepareSendCard(cardData) {
 }
 
 agenda.define('load cards', async job => {
-    console.log('load cards')
-    await axios({
-        method: "get",
-        url: 'https://www.veikkaus.fi//api/toto-info/v1/cards/today',
+    console.log("load cards");
+    axios({
+        method: 'get',
+        url: 'https://www.veikkaus.fi//api/toto-info/v1/cards/active',
         responseType: 'json'
     })
         .then(function (response) {
-            let collection = response['data']['collection'];
-            for (let item in collection) {
-                let card = prepareSendCard(collection[item])
+            let coll = response['data']['collection']
+            for (let card in coll) {
+                let cardData = coll[card];
+                let cardTransform = prepareSendCard(cardData);
                 Card
-                    .findOneAndUpdate({cardId: card['cardId']},
-                        {$set: card},
-                        {new: true, upsert: true})
+                    .findOneAndUpdate({cardId: cardTransform['cardId']},
+                        {$set: cardTransform},
+                        {new: true, upsert: true, useFindAndModify: true})
                     .exec(function (err, card) {
                         if (err) throw err;
-
                     })
             }
         });
 });
+
 
 function prepareSendRace(cardData) {
     let sendVariables = {cardId: cardData['cardId']};
@@ -65,27 +66,28 @@ function prepareSendRace(cardData) {
 agenda.define('load races', async job => {
     console.log('load races')
     Card
-        .find()
+        .find({done: null})
         .exec(function (err, cards) {
-            let counter = 0;
             if (err) throw err;
             for (let card in cards) {
+                let cardId = (cards[card]['cardId']);
                 axios({
                     method: 'get',
-                    url: 'https://www.veikkaus.fi//api/toto-info/v1/card/' + cards[card]['cardId'] + '/races',
+                    url: 'https://www.veikkaus.fi//api/toto-info/v1/card/' + cardId + '/races',
                     responseType: 'json'
                 })
                     .then(function (response) {
-                        for (let cardId in response['data']['collection']) {
-                            let raceData = response['data']['collection'][cardId];
-                            let raceJSON = prepareSendRace(raceData);
+                        let coll = response['data']['collection'];
+                        for (let raceNumber in coll) {
+                            let race = coll[raceNumber];
+                            let raceTransform = prepareSendRace(race);
                             Race
-                                .findOneAndUpdate({cardId: raceData['cardId']},
-                                    {$set: raceJSON},
+                                .findOneAndUpdate({raceId: raceTransform['raceId']},
+                                    {$set: raceTransform},
                                     {new: true, upsert: true})
-                                .exec(function (result) {
+                                .exec(function (err, race) {
                                     if (err) throw err;
-                                });
+                                })
                         }
                     })
             }
@@ -94,10 +96,11 @@ agenda.define('load races', async job => {
 
 function prepareSendPool(poolData) {
     let sendVariables = {cardId: poolData['cardId']}
+    sendVariables['poolId'] = poolData['poolId']
     sendVariables['firstRaceId'] = poolData['firstRaceId']
     sendVariables['poolType'] = poolData['poolType']
     sendVariables['poolName'] = poolData['poolName']
-    sendVariables['poolStatus'] = poolData['poolStartus']
+    sendVariables['poolStatus'] = poolData['poolStatus']
     sendVariables['netSales'] = poolData['netSales']
     sendVariables['netPool'] = poolData['netPool']
     return sendVariables;
@@ -106,30 +109,45 @@ function prepareSendPool(poolData) {
 agenda.define('load pools', async job => {
     console.log('load pools')
     Card
-        .find({})
+        .find({done: null})
         .exec(function (err, cards) {
+            if (err) throw err;
             for (let card in cards) {
+                let cardId = cards[card]['cardId']
                 axios({
                     method: 'get',
-                    url: 'https://www.veikkaus.fi//api/toto-info/v1/card/' + cards[card]['cardId'] + '/pools'
+                    url: 'https://www.veikkaus.fi//api/toto-info/v1/card/' + cardId + '/pools',
+                    responseType: 'json'
                 })
                     .then(function (response) {
-                        for (let cardId in response['data']['collection']) {
-                            let poolData = response['data']['collection'][cardId];
-                            let poolJSON = prepareSendPool(poolData);
-                            Pool
-                                .findOneAndUpdate({cardId: poolData['cardId']},
-                                    {$set: poolJSON},
-                                    {new: true, upsert: true})
-                                .exec(function (result) {
-                                    if (err) throw err;
-                                });
+                        let coll = response['data']['collection'];
+                        for (let poolNumber in coll) {
+                            let pool = coll[poolNumber]
+                            let poolTransform = prepareSendPool(pool);
+                            let poolType = poolTransform['poolType']
+
+                            if (poolType === "VOI" || poolType === "SIJ" || poolType === "TRO" || poolType === "KAK") {
+                                Pool
+                                    .findOneAndUpdate({poolId: poolTransform['poolId']},
+                                        {$set: poolTransform},
+                                        {new:true, upsert: true, useFindAndModify: false})
+                                    .exec(function (err, pItem) {
+                                        if (err) throw err;
+                                    })
+
+                            }
+
+
                         }
-                    })
+                    });
             }
         });
 });
 
+agenda.define('close cards', async job => {
+   Card
+       .find()
+});
 
 /* Start agenda */
 (async function () { // IIFE to give access to async/await
@@ -138,6 +156,7 @@ agenda.define('load pools', async job => {
     await agenda.every('10 minutes', 'load cards')
     await agenda.every('10 minutes', 'load races')
     await agenda.every('2 minutes', 'load pools')
+    await agenda.every('10 minutes', 'close cards')
 })();
 
 /* Graceful exit */
