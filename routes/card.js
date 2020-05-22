@@ -23,7 +23,7 @@ router.get('/:cardId', function (req, res) {
 
 router.get('/active', function (req, res, next) {
     Card
-        .find()
+        .find({active: true})
         .exec(function (err, cards) {
             if (err) throw err;
             res.json(cards)

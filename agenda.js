@@ -1,3 +1,8 @@
+/**
+ *
+ * This file handles the asynchronous downloading of Cards, Races and Pools
+ */
+
 const dburl = 'mongodb://localhost:27017/horses';
 const url = process.env.MONGOLAB_URI;
 const Agenda = require('agenda');
@@ -112,6 +117,11 @@ agenda.define('load races', async job => {
         })
 });
 
+/**
+ * Transform pools to JSON
+ * @param poolData
+ * @returns {{cardId: *}}
+ */
 function prepareSendPool(poolData) {
     let sendVariables = {cardId: poolData['cardId']}
     sendVariables['poolId'] = poolData['poolId']
@@ -124,6 +134,9 @@ function prepareSendPool(poolData) {
     return sendVariables;
 }
 
+/** Set or create Pools
+ *
+ */
 agenda.define('load pools', async job => {
     console.log('load pools')
     Card
@@ -162,6 +175,9 @@ agenda.define('load pools', async job => {
         });
 });
 
+/** Close cards when all Races are "OFFICIAL", i.e. all races are completed
+ *
+ */
 agenda.define('close cards', async job => {
     console.log('close cards')
     Card
@@ -199,7 +215,6 @@ agenda.define('close cards', async job => {
 /* Start agenda */
 (async function () { // IIFE to give access to async/await
     await agenda.start();
-    await agenda.purge();
     await agenda.every('10 minutes', 'load cards')
     await agenda.every('10 minutes', 'load races')
     await agenda.every('2 minutes', 'load pools')

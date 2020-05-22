@@ -15,9 +15,11 @@
                     >
                         <v-list-item three-line>
                             <v-list-item-content>
-                                <div class="overline mb-4">{{ n.meetDate }}</div>
-                                <v-list-item-title class="headline mb-1">{{ n. trackName}}</v-list-item-title>
-                                <v-list-item-subtitle>Greyhound divisely hello coldly fonwderfully
+                                <div class="overline mb-4">{{ n.cardId }}</div>
+                                <v-list-item-title class="headline mb-1">{{ n.trackName }}&nbsp;({{ n.trackAbbreviation }})</v-list-item-title>
+                                <v-list-item-subtitle>{{ n.meetDate }}
+                                </v-list-item-subtitle>
+                                <v-list-item-subtitle>{{ n.trackAbbreviation }}
                                 </v-list-item-subtitle>
                             </v-list-item-content>
                         </v-list-item>
@@ -32,30 +34,35 @@
     import axios from 'axios';
 
     export default {
-        name: 'App',
-
+        name: 'Parent',
         components: {},
-
-        data: () => ({
-
-        }),
-        created() {
-            axios.get('http://localhost:3000/cards')
-                .then(response => {
-                    let cards = []
-                    for (let item in response.data) {
-                        // cards[item]=response.data[item];
-                        // cards[item] = response.data[item];
-                        cards[item] = {
-                            'cardId': response.data[item]['cardId'],
-                            'active': response.data[item]['active'],
-                            'trackName': response.data[item].trackName,
-                            'meetDate': response.data[item].meetDate,
-                            'trackAbbreviation': response.data[item]['trackAbbreviation']
+        data() {
+            return {
+                posts: []
+            }
+        },
+        mounted() {
+            this.getCards();
+        },
+        methods: {
+            getCards: function() {
+                axios.get('http://localhost:3000/cards')
+                    .then(response => {
+                        let cards = []
+                        for (let item in response.data) {
+                            // cards[item]=response.data[item];
+                            // cards[item] = response.data[item];
+                            cards[item] = {
+                                'cardId': response.data[item]['cardId'],
+                                'active': response.data[item]['active'],
+                                'trackName': response.data[item].trackName,
+                                'meetDate': response.data[item].meetDate,
+                                'trackAbbreviation': response.data[item]['trackAbbreviation']
+                            }
                         }
-                    }
-                    this.posts = cards;
-                });
+                        this.posts = cards;
+                    })
+            }
         }
     }
 </script>
