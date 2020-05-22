@@ -38,13 +38,15 @@ agenda.define('load cards', async job => {
             for (let card in coll) {
                 let cardData = coll[card];
                 let cardTransform = prepareSendCard(cardData);
-                Card
-                    .findOneAndUpdate({cardId: cardTransform['cardId']},
-                        {$set: cardTransform},
-                        {new: true, upsert: true, useFindAndModify: true})
-                    .exec(function (err, card) {
-                        if (err) throw err;
-                    })
+                if(cardTransform['country']==="FI") {
+                    Card
+                        .findOneAndUpdate({cardId: cardTransform['cardId']},
+                            {$set: cardTransform},
+                            {new: true, upsert: true, useFindAndModify: true})
+                        .exec(function (err, card) {
+                            if (err) throw err;
+                        })
+                }
             }
         });
 });
@@ -66,7 +68,7 @@ function prepareSendRace(cardData) {
 agenda.define('load races', async job => {
     console.log('load races')
     Card
-        .find({done: null})
+        .find({active: true})
         .exec(function (err, cards) {
             if (err) throw err;
             for (let card in cards) {
@@ -109,7 +111,7 @@ function prepareSendPool(poolData) {
 agenda.define('load pools', async job => {
     console.log('load pools')
     Card
-        .find({done: null})
+        .find({active: true})
         .exec(function (err, cards) {
             if (err) throw err;
             for (let card in cards) {
@@ -130,7 +132,7 @@ agenda.define('load pools', async job => {
                                 Pool
                                     .findOneAndUpdate({poolId: poolTransform['poolId']},
                                         {$set: poolTransform},
-                                        {new:true, upsert: true, useFindAndModify: false})
+                                        {new: true, upsert: true, useFindAndModify: false})
                                     .exec(function (err, pItem) {
                                         if (err) throw err;
                                     })
@@ -145,9 +147,38 @@ agenda.define('load pools', async job => {
 });
 
 agenda.define('close cards', async job => {
-   Card
-       .find()
+    console.log('close cards')
+    Card
+        .find({})
+        .exec(function (err, cards) {
+            if (err) throw err;
+            for (let card in cards) {
+                Race.find({cardId: cards[card]['cardId']})
+                    .exec(function (err, races) {
+                        if (err) throw err;
+                        let official = true;
+                        for (let race in races) {
+                            official = official && (races[race]['raceStatus'] === "OFFICIAL")
+                            if (!official)
+                                break;
+                        }
+
+                        Card
+                            .findOneAndUpdate({cardId: cards[card]['cardId']},
+                                {
+                                    $set: {
+                                        active: !official
+                                    }
+                                },
+                                {new: true})
+                            .exec(function (err2, c2) {
+                                if (err2) throw err2;
+                            })
+                    })
+            }
+        })
 });
+
 
 /* Start agenda */
 (async function () { // IIFE to give access to async/await

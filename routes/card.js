@@ -21,6 +21,15 @@ router.get('/:cardId', function (req, res) {
         })
 });
 
+router.get('/active', function (req, res, next) {
+    Card
+        .find()
+        .exec(function (err, cards) {
+            if (err) throw err;
+            res.json(cards)
+        });
+})
+
 router.post('/', function (req, res) {
     let cardId = req.body.cardId;
     console.log("CARDID: "+cardId)
