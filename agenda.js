@@ -15,6 +15,11 @@ const agenda = new Agenda({
     processEvery: '5 seconds'
 });
 
+/**
+ * Transform card to be set in the load cards task
+ * @param cardData
+ * @returns JSON card
+ */
 function prepareSendCard(cardData) {
     let sendVariables = {cardId: cardData['cardId']};
     sendVariables['firstRaceStart'] = cardData['firstRaceStart'];
@@ -26,6 +31,9 @@ function prepareSendCard(cardData) {
     return sendVariables;
 }
 
+/**
+ * Load the cards from Veikkaus and set the card properties accordingly
+ */
 agenda.define('load cards', async job => {
     console.log("load cards");
     axios({
@@ -51,20 +59,28 @@ agenda.define('load cards', async job => {
         });
 });
 
-
-function prepareSendRace(cardData) {
-    let sendVariables = {cardId: cardData['cardId']};
-    sendVariables['raceId'] = cardData['raceId']
-    sendVariables['number'] = cardData['number']
-    sendVariables['raceStatus'] = cardData['raceStatus']
-    sendVariables['startTime'] = cardData['startTime']
-    sendVariables['startType'] = cardData['startType']
-    sendVariables['distance'] = cardData['distance']
-    sendVariables['breed'] = cardData['breed']
-    sendVariables['toteResultString'] = cardData['toteResultString']
+/**
+ * Transform card to be set in the load cards task
+ *
+ * @param raceData
+ * @returns JSON Race
+ */
+function prepareSendRace(raceData) {
+    let sendVariables = {cardId: raceData['cardId']};
+    sendVariables['raceId'] = raceData['raceId']
+    sendVariables['number'] = raceData['number']
+    sendVariables['raceStatus'] = raceData['raceStatus']
+    sendVariables['startTime'] = raceData['startTime']
+    sendVariables['startType'] = raceData['startType']
+    sendVariables['distance'] = raceData['distance']
+    sendVariables['breed'] = raceData['breed']
+    sendVariables['toteResultString'] = raceData['toteResultString']
     return sendVariables
 }
 
+/**
+ * Load races from Veikkaus servers amd set the JSON data accordingly
+ */
 agenda.define('load races', async job => {
     console.log('load races')
     Card

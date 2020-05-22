@@ -10,11 +10,17 @@
                 >
                     <v-card
                             class="pa-2"
-                            class="mx-auto"
                             outlined
                             tile
                     >
-                        {{ n.trackName }}
+                        <v-list-item three-line>
+                            <v-list-item-content>
+                                <div class="overline mb-4">{{ n.meetDate }}</div>
+                                <v-list-item-title class="headline mb-1">{{ n. trackName}}</v-list-item-title>
+                                <v-list-item-subtitle>Greyhound divisely hello coldly fonwderfully
+                                </v-list-item-subtitle>
+                            </v-list-item-content>
+                        </v-list-item>
                     </v-card>
                 </v-col>
             </v-row>
@@ -31,7 +37,7 @@
         components: {},
 
         data: () => ({
-            //
+
         }),
         created() {
             axios.get('http://localhost:3000/cards')
@@ -45,11 +51,11 @@
                             'active': response.data[item]['active'],
                             'trackName': response.data[item].trackName,
                             'meetDate': response.data[item].meetDate,
+                            'trackAbbreviation': response.data[item]['trackAbbreviation']
                         }
-                        console.log(cards[item])
                     }
                     this.posts = cards;
-                })
+                });
         }
-    };
+    }
 </script>
